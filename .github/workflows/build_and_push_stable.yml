@@ -27,15 +27,15 @@ jobs:
       - name: Build and tag Docker images
         run: |
           for TAG_PREFIX in stable unstable; do
-            docker build -t dull/pureflow:${TAG_PREFIX} .
-            docker tag dull/pureflow:${TAG_PREFIX} brdullc/pureflow:${TAG_PREFIX}-${{ env.SHORT_SHA }}
-            docker tag dull/pureflow:${TAG_PREFIX} brdullc/pureflow:${TAG_PREFIX}-${{ env.SHORT_SHA }}-${{ env.TIMESTAMP }}
+            docker build -t bramkor/pureflow:${TAG_PREFIX} .
+            docker tag bramkor/pureflow:${TAG_PREFIX} bramkor/pureflow:${TAG_PREFIX}-${{ env.SHORT_SHA }}
+            docker tag bramkor/pureflow:${TAG_PREFIX} bramkor/pureflow:${TAG_PREFIX}-${{ env.SHORT_SHA }}-${{ env.TIMESTAMP }}
           done
 
       - name: Push Docker images
         run: |
           for TAG_PREFIX in stable unstable; do
-            docker push dull/pureflow:${TAG_PREFIX}
-            docker push dull/pureflow:${TAG_PREFIX}-${{ env.SHORT_SHA }}
-            docker push dull/pureflow:${TAG_PREFIX}-${{ env.SHORT_SHA }}-${{ env.TIMESTAMP }}
+            docker push bramkor/pureflow:${TAG_PREFIX}
+            docker push bramkor/pureflow:${TAG_PREFIX}-${{ env.SHORT_SHA }}
+            docker push bramkor/pureflow:${TAG_PREFIX}-${{ env.SHORT_SHA }}-${{ env.TIMESTAMP }}
           done
