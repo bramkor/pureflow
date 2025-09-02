@@ -71,6 +71,23 @@ export class PartnersService {
   }
 
   getPartnersProperties(xpathExpression: string): string {
+    const xmlNodes = this.selectPartnerPropertiesByXPATH(xpathExpression);
+
+    if (!Array.isArray(xmlNodes)) {
+      this.logger.debug(
+        `xmlNodes's type wasn't 'Array', and it's value was: ${xmlNodes}`
+      );
+      return this.getFormattedXMLOutput([]);
+    }
+
+    this.logger.debug(`Raw xpath xmlNodes value is: ${xmlNodes}`);
+    return this.getFormattedXMLOutput(xmlNodes);
+  }
+
+  getPartnersProperties(username: string, password: string): string {
+    const sanitizedUsername = this.sanitizeInput(username);
+    const sanitizedPassword = this.sanitizeInput(password);
+    const xpathExpression = `//partners/partner[username/text()='${sanitizedUsername}' and password/text()='${sanitizedPassword}']/*`;
     let xmlNodes = this.selectPartnerPropertiesByXPATH(xpathExpression);
 
     if (!Array.isArray(xmlNodes)) {
@@ -83,5 +100,10 @@ export class PartnersService {
     }
 
     return this.getFormattedXMLOutput(xmlNodes);
+  }
+
+  sanitizeInput(input: string): string {
+    // Escape single quotes and other potentially dangerous characters
+    return input.replace(/'/g, "\'").replace(/"/g, '\"').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 }
