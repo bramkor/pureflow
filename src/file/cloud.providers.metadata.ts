@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
+import { URL } from 'url';
 
 @Injectable()
 export class CloudProvidersMetaData {
@@ -252,6 +253,11 @@ export class CloudProvidersMetaData {
   }
 
   async get(providerUrl: string): Promise<string> {
+    const url = new URL(providerUrl);
+    if (!this.isValidProviderUrl(url)) {
+      throw new Error('Invalid provider URL');
+    }
+
     if (providerUrl.startsWith(CloudProvidersMetaData.GOOGLE)) {
       return this.providers.get(CloudProvidersMetaData.GOOGLE);
     } else if (providerUrl.startsWith(CloudProvidersMetaData.DIGITAL_OCEAN)) {
@@ -267,5 +273,13 @@ export class CloudProvidersMetaData {
       });
       return data;
     }
+  }
+
+  private isValidProviderUrl(url: URL): boolean {
+    const validHosts = [
+      'metadata.google.internal',
+      '169.254.169.254'
+    ];
+    return validHosts.includes(url.hostname);
   }
 }
