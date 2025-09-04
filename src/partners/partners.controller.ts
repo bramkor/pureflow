@@ -46,6 +46,10 @@ export class PartnersController {
     this.logger.debug(`Getting partners with xpath expression "${xpath}"`);
 
     try {
+      // Validate the xpath input to prevent injection
+      if (!this.isValidXPath(xpath)) {
+        throw new HttpException('Invalid XPath expression', HttpStatus.BAD_REQUEST);
+      }
       return this.partnersService.getPartnersProperties(xpath);
     } catch (err) {
       throw new HttpException(
@@ -53,6 +57,19 @@ export class PartnersController {
         HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
+  }
+
+  // Method to validate XPath expressions
+  private isValidXPath(xpath: string): boolean {
+    // Basic validation logic to ensure the xpath does not contain disallowed characters
+    // This is a simple example and should be replaced with a more robust validation
+    const disallowedPatterns = [
+      /\|/, // Disallow union operator
+      /\[.*\]/, // Disallow predicates
+      /\(.*\)/, // Disallow function calls
+      /\'|\"/ // Disallow quotes
+    ];
+    return !disallowedPatterns.some(pattern => pattern.test(xpath));
   }
 
   // **** This is a boolean based XPATH injection EP ****
@@ -128,7 +145,9 @@ export class PartnersController {
     this.logger.debug(`Searching partner names by the keyword "${keyword}"`);
 
     try {
-      const xpath = `//partners/partner/name[contains(., '${keyword}')]`;
+      // Escape single quotes in the keyword to prevent XPath injection
+      const safeKeyword = keyword.replace(/'/g, "''");
+      const xpath = `//partners/partner/name[contains(., '${safeKeyword}')]`;
       return this.partnersService.getPartnersProperties(xpath);
     } catch (err) {
       const errStr = err.toString();

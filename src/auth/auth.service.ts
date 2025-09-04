@@ -121,11 +121,25 @@ export class AuthService {
     );
   }
 
-  validateToken(token: string, processor: JwtProcessorType): Promise<unknown> {
-    return this.processors.get(processor).validateToken(token);
+  async validateToken(token: string, processor: JwtProcessorType): Promise<unknown> {
+    const tokenProcessor = this.processors.get(processor);
+    if (!tokenProcessor) {
+      throw new Error('Invalid JWT processor type');
+    }
+    // Ensure the algorithm is not 'none'
+    if (this.isAlgorithmNone(token)) {
+      throw new Error('Invalid token algorithm');
+    }
+    return tokenProcessor.validateToken(token);
   }
 
   createToken(payload: unknown, processor: JwtProcessorType): Promise<string> {
     return this.processors.get(processor).createToken(payload);
+  }
+
+  private isAlgorithmNone(token: string): boolean {
+    const [header] = token.split('.');
+    const decodedHeader = JSON.parse(Buffer.from(header, 'base64').toString('utf8'));
+    return decodedHeader.alg === 'none';
   }
 }
