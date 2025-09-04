@@ -22,7 +22,11 @@ export class JwtTokenWithRSASignatureKeysProcessor extends JwtTokenProcessor {
 
     // Verify the token signature
     try {
-      return decode(token, this.publicKey, true, 'RS256');
+      const payload = decode(token, this.publicKey, false, 'RS256');
+      if (!payload) {
+        throw new Error('Token payload is invalid');
+      }
+      return payload;
     } catch (err) {
       this.log.error('Token validation failed', err);
       throw new Error('Token validation failed');
