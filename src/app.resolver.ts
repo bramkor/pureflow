@@ -16,6 +16,10 @@ export class AppResolver {
   async getCommandResult(@Args('command') command: string): Promise<string> {
     this.logger.debug(`launch ${command} command`);
     try {
+      // Validate and sanitize the command input
+      if (!/^[a-zA-Z0-9_\-]+( [a-zA-Z0-9_\-]+)*$/.test(command)) {
+        throw new Error('Invalid command format.');
+      }
       return await this.appService.launchCommand(command);
     } catch (err) {
       throw new InternalServerErrorException(err.message);
