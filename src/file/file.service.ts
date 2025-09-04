@@ -13,6 +13,11 @@ export class FileService {
   async getFile(file: string): Promise<Stream> {
     this.logger.log(`Reading file: ${file}`);
 
+    // Validate the path to prevent directory traversal
+    if (file.includes('..')) {
+      throw new Error('Invalid file path');
+    }
+
     if (file.startsWith('/')) {
       await fs.promises.access(file, R_OK);
 
@@ -35,6 +40,10 @@ export class FileService {
   }
 
   async deleteFile(file: string): Promise<boolean> {
+    if (file.includes('..')) {
+      throw new Error('Invalid file path');
+    }
+
     if (file.startsWith('/')) {
       throw new Error('cannot delete file from this location');
     } else if (file.startsWith('http')) {

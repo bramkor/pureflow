@@ -122,6 +122,9 @@ export class AuthService {
   }
 
   validateToken(token: string, processor: JwtProcessorType): Promise<unknown> {
+    if (!token) {
+      throw new Error('Token is required');
+    }
     return this.processors.get(processor).validateToken(token);
   }
 
