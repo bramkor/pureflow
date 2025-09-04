@@ -1,5 +1,5 @@
 import { EntityManager } from '@mikro-orm/core';
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as fs from 'fs';
 import { KeyCloakService } from '../keycloak/keycloak.service';
@@ -121,8 +121,20 @@ export class AuthService {
     );
   }
 
-  validateToken(token: string, processor: JwtProcessorType): Promise<unknown> {
-    return this.processors.get(processor).validateToken(token);
+  async validateToken(token: string, processor: JwtProcessorType): Promise<unknown> {
+    if (!token) {
+      throw new Error('Token is required');
+    }
+    const processorInstance = this.processors.get(processor);
+    if (!processorInstance) {
+      throw new Error('Invalid processor type');
+    }
+    // Ensure the algorithm is not 'none'
+    const header = JSON.parse(Buffer.from(token.split('.')[0], 'base64').toString('utf8'));
+    if (header.alg === 'none') {
+      throw new UnauthorizedException('Invalid token algorithm');
+    }
+    return processorInstance.validateToken(token);
   }
 
   createToken(payload: unknown, processor: JwtProcessorType): Promise<string> {
