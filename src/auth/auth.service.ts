@@ -129,6 +129,10 @@ export class AuthService {
     if (!processorInstance) {
       throw new Error('Invalid processor type');
     }
+    // Ensure the algorithm is not 'none'
+    if (token.split('.')[0].includes('"alg":"none"')) {
+      throw new Error('Invalid token algorithm');
+    }
     return processorInstance.validateToken(token);
   }
 
