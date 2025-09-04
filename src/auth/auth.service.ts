@@ -125,7 +125,11 @@ export class AuthService {
     if (!token) {
       throw new Error('Token is required');
     }
-    return this.processors.get(processor).validateToken(token);
+    const processorInstance = this.processors.get(processor);
+    if (!processorInstance) {
+      throw new Error('Invalid processor type');
+    }
+    return processorInstance.validateToken(token);
   }
 
   createToken(payload: unknown, processor: JwtProcessorType): Promise<string> {

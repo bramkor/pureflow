@@ -14,7 +14,7 @@ export class FileService {
     this.logger.log(`Reading file: ${file}`);
 
     // Validate the path to prevent directory traversal
-    if (file.includes('..')) {
+    if (file.includes('..') || file.startsWith('/')) {
       throw new Error('Invalid file path');
     }
 
@@ -40,7 +40,7 @@ export class FileService {
   }
 
   async deleteFile(file: string): Promise<boolean> {
-    if (file.includes('..')) {
+    if (file.includes('..') || file.startsWith('/')) {
       throw new Error('Invalid file path');
     }
 

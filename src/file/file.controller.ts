@@ -87,7 +87,7 @@ export class FileController {
     @Res({ passthrough: true }) res: FastifyReply
   ) {
     // Validate the path to prevent directory traversal
-    if (path.includes('..')) {
+    if (path.includes('..') || path.startsWith('/')) {
       throw new BadRequestException('Invalid file path');
     }
 
