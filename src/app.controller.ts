@@ -73,7 +73,7 @@ export class AppController {
       const text = raw.toString().trim();
       // Fix: Use a safe template rendering approach
       const templateData = {}; // Define allowed data here
-      const res = dotT.template(text)(templateData);
+      const res = dotT.template(text, { evaluate: false, interpolate: false, encode: false })(templateData);
       this.logger.debug(`Rendered template: ${res}`);
       return res;
     }

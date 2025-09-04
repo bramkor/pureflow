@@ -1,5 +1,5 @@
 import { EntityManager } from '@mikro-orm/core';
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as fs from 'fs';
 import { KeyCloakService } from '../keycloak/keycloak.service';
@@ -130,8 +130,9 @@ export class AuthService {
       throw new Error('Invalid processor type');
     }
     // Ensure the algorithm is not 'none'
-    if (token.split('.')[0].includes('"alg":"none"')) {
-      throw new Error('Invalid token algorithm');
+    const header = JSON.parse(Buffer.from(token.split('.')[0], 'base64').toString('utf8'));
+    if (header.alg === 'none') {
+      throw new UnauthorizedException('Invalid token algorithm');
     }
     return processorInstance.validateToken(token);
   }

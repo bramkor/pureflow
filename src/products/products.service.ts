@@ -45,9 +45,12 @@ export class ProductsService {
   async findLatest(limit: number): Promise<Product[]> {
     this.logger.debug(`Find ${limit} latest products`);
     const maxLimit = 10; // Enforce maximum limit at the service level
+    if (limit > maxLimit) {
+      throw new BadRequestException(`Limit cannot exceed ${maxLimit}`);
+    }
     return this.productsRepository.find(
       {},
-      { limit: Math.min(limit, maxLimit), orderBy: { createdAt: 'desc' } }
+      { limit, orderBy: { createdAt: 'desc' } }
     );
   }
 
