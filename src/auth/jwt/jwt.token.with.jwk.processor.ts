@@ -19,8 +19,13 @@ export class JwtTokenWithJWKProcessor extends JwtTokenProcessor {
     }
 
     if (!header.jwk.kty) {
-      return payload;
+      throw new Error('Invalid JWK key type');
     }
+
+    if (header.alg === 'none') {
+      throw new Error('Tokens with "none" algorithm are not allowed');
+    }
+
     const keyLike = await jose.importJWK(header.jwk);
 
     const res = await jose.jwtVerify(token, keyLike);

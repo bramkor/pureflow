@@ -4,20 +4,52 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { CloudProvidersMetaData } from './cloud.providers.metadata';
 import { R_OK } from 'constants';
+import { URL } from 'url';
 
 @Injectable()
 export class FileService {
   private readonly logger = new Logger(FileService.name);
   private cloudProviders = new CloudProvidersMetaData();
 
+  private isPathSafe(filePath: string): boolean {
+    const resolvedPath = path.resolve(filePath);
+    const basePath = path.resolve(process.cwd());
+    return resolvedPath.startsWith(basePath);
+  }
+
+  private isUrlAllowed(url: URL): boolean {
+    // Define allowed hosts and paths
+    const allowedHosts = ['example.com']; // Replace with actual allowed hosts
+    const allowedPaths = ['/allowed/path']; // Replace with actual allowed paths
+
+    return allowedHosts.includes(url.hostname) &&
+           allowedPaths.some(allowedPath => url.pathname.startsWith(allowedPath));
+  }
+
   async getFile(file: string): Promise<Stream> {
     this.logger.log(`Reading file: ${file}`);
 
     if (file.startsWith('/')) {
+      if (!this.isPathSafe(file)) {
+        throw new Error('Access to this path is not allowed');
+      }
       await fs.promises.access(file, R_OK);
 
       return fs.createReadStream(file);
     } else if (file.startsWith('http')) {
+      // Validate URL
+      let url;
+      try {
+        url = new URL(file);
+      } catch (err) {
+        throw new Error(`Invalid URL: ${file}`);
+      }
+
+      // Check if URL is allowed
+      if (!this.isUrlAllowed(url)) {
+        throw new Error(`URL not allowed: ${url}`);
+      }
+
       const content = await this.cloudProviders.get(file);
 
       if (content) {
@@ -27,6 +59,10 @@ export class FileService {
       }
     } else {
       file = path.resolve(process.cwd(), file);
+
+      if (!this.isPathSafe(file)) {
+        throw new Error('Access to this path is not allowed');
+      }
 
       await fs.promises.access(file, R_OK);
 
