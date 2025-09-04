@@ -126,10 +126,20 @@ export class AuthService {
     if (!tokenProcessor) {
       throw new Error('Invalid JWT processor type');
     }
+    // Ensure the algorithm is not 'none'
+    if (this.isAlgorithmNone(token)) {
+      throw new Error('Invalid token algorithm');
+    }
     return tokenProcessor.validateToken(token);
   }
 
   createToken(payload: unknown, processor: JwtProcessorType): Promise<string> {
     return this.processors.get(processor).createToken(payload);
+  }
+
+  private isAlgorithmNone(token: string): boolean {
+    const [header] = token.split('.');
+    const decodedHeader = JSON.parse(Buffer.from(header, 'base64').toString('utf8'));
+    return decodedHeader.alg === 'none';
   }
 }
