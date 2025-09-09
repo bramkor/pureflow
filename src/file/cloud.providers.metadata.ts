@@ -253,19 +253,15 @@ export class CloudProvidersMetaData {
 
   async get(providerUrl: string): Promise<string> {
     if (providerUrl.startsWith(CloudProvidersMetaData.GOOGLE)) {
-      return this.providers.get(CloudProvidersMetaData.GOOGLE);
+      throw new Error('Access to Google Cloud Metadata is not allowed');
     } else if (providerUrl.startsWith(CloudProvidersMetaData.DIGITAL_OCEAN)) {
-      return this.providers.get(CloudProvidersMetaData.DIGITAL_OCEAN);
+      throw new Error('Access to Digital Ocean Metadata is not allowed');
     } else if (providerUrl.startsWith(CloudProvidersMetaData.AWS)) {
-      return this.providers.get(CloudProvidersMetaData.AWS);
+      throw new Error('Access to AWS Metadata is not allowed');
     } else if (providerUrl.startsWith(CloudProvidersMetaData.AZURE)) {
-      return this.providers.get(CloudProvidersMetaData.AZURE);
+      throw new Error('Access to Azure Metadata is not allowed');
     } else {
-      const { data } = await axios(providerUrl, {
-        timeout: 5000,
-        responseType: 'text'
-      });
-      return data;
+      throw new Error('Access to the specified URL is not allowed');
     }
   }
 }

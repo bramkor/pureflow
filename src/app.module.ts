@@ -35,8 +35,16 @@ import { ChatModule } from './chat/chat.module';
     HttpClientModule,
     GraphQLModule.forRoot<MercuriusDriverConfig>({
       driver: MercuriusDriver,
-      graphiql: true,
-      autoSchemaFile: true
+      graphiql: false, // Disable GraphiQL to prevent introspection via the UI
+      autoSchemaFile: true,
+      introspection: false, // Ensure introspection is disabled
+      context: ({ request }) => ({
+        headers: request.headers
+      }),
+      formatError: (error) => {
+        // Customize error messages to avoid leaking sensitive information
+        return new Error('Internal server error');
+      }
     }),
     PartnersModule,
     EmailModule,
