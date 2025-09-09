@@ -126,6 +126,10 @@ export class AuthService {
     if (!tokenProcessor) {
       throw new Error('Invalid token processor type');
     }
+    const [header] = tokenProcessor.parse(token);
+    if (header.alg === 'none') {
+      throw new Error('Tokens with "none" algorithm are not allowed');
+    }
     return tokenProcessor.validateToken(token);
   }
 
